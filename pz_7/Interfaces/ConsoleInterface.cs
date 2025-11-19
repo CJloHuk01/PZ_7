@@ -11,21 +11,28 @@ namespace pz_7.Interfaces
         private readonly ICreditCalculator _creditCalculator;
         private readonly ICurrencyConverter _currencyConverter;
         private readonly IDepositCalculator _depositCalculator;
+        private readonly bool _skipClear;
+        private readonly bool _skipWait;
 
         public ConsoleInterface(ICreditCalculator creditCalculator,
                               ICurrencyConverter currencyConverter,
-                              IDepositCalculator depositCalculator)
+                              IDepositCalculator depositCalculator,
+                              bool skipClear = false,
+                              bool skipWait = false)
         {
             _creditCalculator = creditCalculator;
             _currencyConverter = currencyConverter;
             _depositCalculator = depositCalculator;
+            _skipClear = skipClear;
+            _skipWait = skipWait;
         }
 
         public void Run()
         {
             while (true)
             {
-                Console.Clear();
+                if (!_skipClear) Console.Clear();
+
                 ShowMainMenu();
 
                 string choice = Console.ReadLine();
@@ -45,7 +52,7 @@ namespace pz_7.Interfaces
                         return;
                     default:
                         Console.WriteLine("Неверный выбор! Нажмите любую клавишу...");
-                        Console.ReadKey();
+                        if (!_skipWait) Console.ReadKey();
                         break;
                 }
             }
@@ -57,12 +64,14 @@ namespace pz_7.Interfaces
             Console.WriteLine("2. Конвертер валют");
             Console.WriteLine("3. Калькулятор вкладов");
             Console.WriteLine("4. Выход");
+            Console.WriteLine("");
             Console.Write("Выберите опцию: ");
         }
 
         private void HandleCreditCalculation()
         {
-            Console.Clear();
+            if (!_skipClear) Console.Clear();
+
             try
             {
                 var data = new CreditData
@@ -87,7 +96,7 @@ namespace pz_7.Interfaces
 
         private void HandleCurrencyConversion()
         {
-            Console.Clear();
+            if (!_skipClear) Console.Clear();
 
             try
             {
@@ -111,7 +120,8 @@ namespace pz_7.Interfaces
 
         private void HandleDepositCalculation()
         {
-            Console.Clear();
+            if (!_skipClear) Console.Clear();
+
             try
             {
                 var data = new DepositData
@@ -188,7 +198,6 @@ namespace pz_7.Interfaces
             Console.WriteLine($"Ежемесячный платеж: {result.MonthlyPayment:F2} руб");
             Console.WriteLine($"Общая сумма выплат: {result.TotalAmount:F2} руб");
             Console.WriteLine($"Переплата по кредиту: {result.Overpayment:F2} руб");
-
         }
 
         private void DisplayDepositResults(DepositData data, (double Income, double TotalAmount) result)
@@ -202,8 +211,11 @@ namespace pz_7.Interfaces
 
         private void WaitForContinue()
         {
-            Console.WriteLine("\nНажмите любую клавишу для продолжения...");
-            Console.ReadKey();
+            if (!_skipWait)
+            {
+                Console.WriteLine("\nНажмите любую клавишу для продолжения...");
+                Console.ReadKey();
+            }
         }
     }
 }
